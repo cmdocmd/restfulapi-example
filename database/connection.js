@@ -1,4 +1,4 @@
-const { Sequelize } = requie('sequelize');
+const { Sequelize } = require('sequelize');
 
 //schema name, username, password
 const sequelize = new Sequelize("nanovoltz", "root", "wfh13102003", {
