@@ -167,3 +167,67 @@ describe('GET /users/:id', () => {
         expect(response.text).toBe('Internal Server Error');
     });
 });
+
+// Update details of a specific user
+describe('PUT /users/update/:id', () => {
+    test('should update a user by id', async () => {
+        const user = {
+            id: 1,
+            username: 'test',
+            email: 'test@gmail.com',
+            password: 'testpass'
+        };
+
+        const updatedUser = {
+            id: 1,
+            username: 'updated_test',
+            email: 'updated_test@gmail.com',
+            password: 'updated_testpass'
+        };
+
+        User.findByPk = jest.fn().mockResolvedValue(user);
+        User.update = jest.fn().mockResolvedValue(updatedUser);
+
+        const response = await request(app)
+            .put('/users/1')
+            .send({
+                username: 'updated_test',
+                email: 'updated_test@gmail.com',
+                password: 'updated_testpass'
+            });
+
+        expect(response.statusCode).toBe(200);
+        expect(response.text).toBe('User updated successfully');
+    });
+
+    test('should handle invalid id parameter', async () => {
+        const response = await request(app).put('/users/abc');
+
+        expect(response.statusCode).toBe(400);
+        expect(response.text).toBe('Invalid ID parameter. It must be an Integer');
+    });
+
+    test('should handle user not found', async () => {
+        User.findByPk = jest.fn().mockResolvedValue(null);
+
+        const response = await request(app).put('/users/990');
+
+        expect(response.statusCode).toBe(404);
+        expect(response.text).toBe('User not found');
+    });
+    
+    test('should handle server errors', async () => {
+        User.findByPk = jest.fn().mockRejectedValue(new Error('Database error'));
+
+        const response = await request(app)
+            .put('/users/1')
+            .send({
+                username: 'updated_test',
+                email: 'updated_test@gmail.com',
+                password: 'updated_testpass'
+            });
+
+        expect(response.statusCode).toBe(500);
+        expect(response.text).toBe('Internal Server Error');
+    });    
+});

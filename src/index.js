@@ -44,7 +44,7 @@ app.get('/users', async (req, res) => {
 app.post('/auth/signup', async (req, res) => {
     try {
     const {username, email, password} = req.body // POST request uses Body
-    if (username === "" || email === "" || password === "" || username.length > 255 || email.length > 255 || password.length > 255)
+    if (!username || !email || !password || username === "" || email === "" || password === "" || username.length > 255 || email.length > 255 || password.length > 255)
     {
         return res.status(400).json({ error: "Invalid input. Username, email, or password is empty or exceeds maximum length." });
     }
@@ -65,7 +65,7 @@ app.post('/auth/signup', async (req, res) => {
 app.post('/auth/login', async (req, res) => {
     try {
         const { email, password} = req.body;
-        if (email === "" || password === "" || email.length > 255 || password.length > 255)
+        if (!email || !password || email === "" || password === "" || email.length > 255 || password.length > 255)
         {
             return res.status(401).json({ error: "Invalid email or password" });
         }
@@ -115,11 +115,6 @@ app.put('/users/:id', async (req, res) => {
         const id = req.params.id;
         const { username, email, password } = req.body;
 
-        if (username.length > 255 || email.length > 255 || password.length > 255)
-        {
-            return res.status(400).json({ error: "Invalid input. Username, email, or password is exceeds maximum length." });
-        }
-
         if (!Number.isInteger(parseInt(id))) // Invalid ID
         {
             return res.status(400).send("Invalid ID parameter. It must be an Integer");
@@ -132,15 +127,23 @@ app.put('/users/:id', async (req, res) => {
             return res.status(404).send('User not found');
         }
 
-        await user.update({
+        if (!username || !email || !password || username.length > 255 || email.length > 255 || password.length > 255)
+        {
+            return res.status(400).json({ error: "Invalid input. Username, email, or password exceeds maximum length." });
+        }
+
+        await User.update({
             username: username || user.username, // in case username is not provided keep the default one.
             email: email || user.email, //
             password: password || user.password //
+        },
+        {
+            where: {id: id}
         });
 
         res.send('User updated successfully');
     } catch (err) {
-        console.error('Error in updating user with id: ' + id, err); // show console error
+        console.error('Error in updating user with id: ' + req.params.id, err); // show console error
         res.status(500).send("Internal Server Error"); // reply with an error
     }
 });
@@ -163,7 +166,7 @@ app.delete('/users/:id', async (req, res) => {
 
         res.send("User deleted successfuly");
     } catch (err) {
-        console.error('Error in deleting user with id: ' + id, err); // show console error
+        console.error('Error in deleting user with id: ' + req.params.id, err); // show console error
         res.status(500).send("Internal Server Error"); // reply with an error
     }
 });
@@ -189,7 +192,7 @@ app.post("/posts", AuthenticateToken, async (req, res) => {
             return res.status(400).send("Invalid ID parameter. It must be an Integer");
         }
 
-        if (title === "" || content === "" || title.length > 255)
+        if (!title || !content || title === "" || content === "" || title.length > 255)
         {
             return res.status(400).json({ error: "Invalid input. title or content is empty or exceeds maximum length." });
         }
@@ -221,7 +224,7 @@ app.get('/posts/:id', async (req, res) => {
         res.send('Retreieved Post with id: ' + id + " " + JSON.stringify(post));
 
     } catch (err) {
-            console.error('Error retreving post with id: ' + id, err); // show console error
+            console.error('Error retreving post with id: ' + req/params.id, err); // show console error
             res.status(500).send("Internal Server Error"); // reply with an error
     }
 });
@@ -232,7 +235,7 @@ app.put('/posts/:id', AuthenticateToken, async (req, res) => {
         const id = req.params.id;
         const { title, content, authorId } = req.body;
 
-        if (title.length > 255)
+        if (!title || !content || !authorId || title.length > 255)
         {
             res.status(400).json({ error: "Invalid input. title is exceeds maximum length." });
         }
@@ -248,15 +251,18 @@ app.put('/posts/:id', AuthenticateToken, async (req, res) => {
             return res.status(404).send('Post not found');
         }
 
-        await post.update({
+        await Post.update({
             title: title || post.title, // in case title is not provided keep the default one.
             content: content || post.content, //
             authorId: authorId || post.authorId //
+        },
+        {
+            where: {id: id}
         });
 
         res.send('Post updated successfully');
     } catch (err) {
-        console.error('Error in updating post with id: ' + id, err); // show console error
+        console.error('Error in updating post with id: ' + req.params.id, err); // show console error
         res.status(500).send("Internal Server Error"); // reply with an error
     }
 });
@@ -280,7 +286,7 @@ app.delete('/posts/:id', AuthenticateToken, async (req, res) => {
 
         res.send("Post deleted successfuly");
     } catch (err) {
-        console.error('Error in deleting post with id: ' + id, err); // show console error
+        console.error('Error in deleting post with id: ' + req.params.id, err); // show console error
         res.status(500).send("Internal Server Error"); // reply with an error
     }
 });
