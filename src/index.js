@@ -81,10 +81,33 @@ app.put('/users/:id', async (req, res) => {
 
         res.send('User updated successfully');
     } catch (err) {
-        console.error('Error retreving user with id: ' + id, err); // show console error
+        console.error('Error in updating user with id: ' + id, err); // show console error
         res.status(500).send("Internal Server Error"); // reply with an error
     }
 });
+
+// Delete a specific user
+app.delete('/users/:id', async (req, res) => {
+    try {
+        const id = req.params.id;
+        const { username, email, password } = req.body;
+
+        if (!Number.isInteger(parseInt(id))) // Invalid ID
+        {
+            res.status(400).send("Invalid ID parameter. It must be an Integer");   
+            return;
+        }
+        const user = await User.findByPk(id); // TODO handle NULL
+
+        await user.destroy();
+
+        res.send("User deleted successfuly");
+    } catch (err) {
+        console.error('Error in deleting user with id: ' + id, err); // show console error
+        res.status(500).send("Internal Server Error"); // reply with an error
+    }
+});
+
 
 app.listen(PORT, ()=> {
     console.log(`Server is running on ${PORT} Port`);
