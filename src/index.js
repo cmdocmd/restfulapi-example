@@ -101,10 +101,10 @@ app.get('/users/:id', async (req, res) => {
         {
             return res.status(404).send('User not found');
         }
-        res.send('Retreieved User with id: ' + id + " " + JSON.stringify(user));
+        res.json(user);
 
     } catch (err) {
-            console.error('Error retreving user with id: ' + id, err); // show console error
+            console.error('Error retreving user with id: ' + req.params.id, err); // show console error
             res.status(500).send("Internal Server Error"); // reply with an error
     }
 });
