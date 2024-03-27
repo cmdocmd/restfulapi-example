@@ -90,7 +90,6 @@ app.put('/users/:id', async (req, res) => {
 app.delete('/users/:id', async (req, res) => {
     try {
         const id = req.params.id;
-        const { username, email, password } = req.body;
 
         if (!Number.isInteger(parseInt(id))) // Invalid ID
         {
@@ -177,6 +176,27 @@ app.put('/posts/:id', async (req, res) => {
         res.send('Post updated successfully');
     } catch (err) {
         console.error('Error in updating post with id: ' + id, err); // show console error
+        res.status(500).send("Internal Server Error"); // reply with an error
+    }
+});
+
+// Delete a specific post
+app.delete('/posts/:id', async (req, res) => {
+    try {
+        const id = req.params.id;
+
+        if (!Number.isInteger(parseInt(id))) // Invalid ID
+        {
+            res.status(400).send("Invalid ID parameter. It must be an Integer");   
+            return;
+        }
+        const post = await Post.findByPk(id); // TODO handle NULL
+
+        await post.destroy();
+
+        res.send("Post deleted successfuly");
+    } catch (err) {
+        console.error('Error in deleting post with id: ' + id, err); // show console error
         res.status(500).send("Internal Server Error"); // reply with an error
     }
 });
