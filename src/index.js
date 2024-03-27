@@ -44,6 +44,10 @@ app.get('/users', async (req, res) => {
 app.post('/auth/signup', async (req, res) => {
     try {
     const {username, email, password} = req.body // POST request uses Body
+    if (username === "" || email === "" || password === "" || username.length > 255 || email.length > 255 || password.length > 255)
+    {
+        return res.status(400).json({ error: "Invalid input. Username, email, or password is empty or exceeds maximum length." });
+    }
     const hashedPass = await bcrypt.hash(password, 10); // Hashing password
         const newUser = await User.create({
             username: username,
@@ -61,6 +65,10 @@ app.post('/auth/signup', async (req, res) => {
 app.post('/auth/login', async (req, res) => {
     try {
         const { email, password} = req.body;
+        if (email === "" || password === "" || email.length > 255 || password.length > 255)
+        {
+            return res.status(401).json({ error: "Invalid email or password" });
+        }
         const user = await User.findOne({where: { email }});
         if (!user)
         {
@@ -106,6 +114,11 @@ app.put('/users/:id', async (req, res) => {
     try {
         const id = req.params.id;
         const { username, email, password } = req.body;
+
+        if (username.length > 255 || email.length > 255 || password.length > 255)
+        {
+            return res.status(400).json({ error: "Invalid input. Username, email, or password is exceeds maximum length." });
+        }
 
         if (!Number.isInteger(parseInt(id))) // Invalid ID
         {
@@ -170,7 +183,16 @@ app.get('/posts', async (req, res) => {
 app.post("/posts", AuthenticateToken, async (req, res) => {
     try {
         const {title, content, authorId} = req.body 
-    
+
+        if (!Number.isInteger(parseInt(authorId))) // Invalid authorId
+        {  
+            return res.status(400).send("Invalid ID parameter. It must be an Integer");
+        }
+
+        if (title === "" || content === "" || title.length > 255)
+        {
+            return res.status(400).json({ error: "Invalid input. title or content is empty or exceeds maximum length." });
+        }
             const newPost = await Post.create({
                 title: title,
                 content: content,
@@ -209,6 +231,11 @@ app.put('/posts/:id', AuthenticateToken, async (req, res) => {
     try {
         const id = req.params.id;
         const { title, content, authorId } = req.body;
+
+        if (title.length > 255)
+        {
+            res.status(400).json({ error: "Invalid input. title is exceeds maximum length." });
+        }
 
         if (!Number.isInteger(parseInt(id))) // Invalid ID
         {
