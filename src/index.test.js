@@ -278,3 +278,26 @@ describe('DELETE /users/:id', () => {
         expect(response.text).toBe('Internal Server Error');
     });
 });
+
+// Retrieve a list of all posts Test
+describe('GET /posts', () => {
+    test('should return a list of all posts', async () => {
+        const mockPosts = [
+            { id: 1, title: 'Post 1', content: 'Content 1' },
+            { id: 2, title: 'Post 2', content: 'Content 2' }
+        ];
+        Post.findAll = jest.fn().mockResolvedValue(mockPosts);
+
+        const response = await request(app).get('/posts');
+        expect(response.statusCode).toBe(200);
+        expect(response.body).toEqual(mockPosts);
+        expect(Post.findAll).toHaveBeenCalled();
+    });
+    test('should handle server errors', async () => {
+        Post.findAll = jest.fn().mockRejectedValue(new Error('Database error'));
+
+        const response = await request(app).get('/posts');
+        expect(response.statusCode).toBe(500);
+        expect(response.text).toBe('Internal Server Error');
+    });
+});
