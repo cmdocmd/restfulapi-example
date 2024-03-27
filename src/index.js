@@ -291,4 +291,7 @@ app.listen(PORT, ()=> {
 });
 
 
-module.exports = app; // exporting app for testing purposes
+module.exports = {
+    app,
+    bcrypt
+  };
