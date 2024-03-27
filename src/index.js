@@ -154,6 +154,33 @@ app.get('/posts/:id', async (req, res) => {
     }
 });
 
+// Update details of specific user
+app.put('/posts/:id', async (req, res) => {
+    try {
+        const id = req.params.id;
+        const { title, content, authorId } = req.body;
+
+        if (!Number.isInteger(parseInt(id))) // Invalid ID
+        {
+            res.status(400).send("Invalid ID parameter. It must be an Integer");   
+            return;
+        }
+
+        const post = await Post.findByPk(id); // TODO handle NULL
+
+        await post.update({
+            title: title || post.title, // in case title is not provided keep the default one.
+            content: content || post.content, //
+            authorId: authorId || post.authorId //
+        });
+
+        res.send('Post updated successfully');
+    } catch (err) {
+        console.error('Error in updating post with id: ' + id, err); // show console error
+        res.status(500).send("Internal Server Error"); // reply with an error
+    }
+});
+
 
 app.listen(PORT, ()=> {
     console.log(`Server is running on ${PORT} Port`);
