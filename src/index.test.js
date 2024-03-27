@@ -232,6 +232,7 @@ describe('PUT /users/:id', () => {
     });    
 });
 
+// Delete a specific user TEST
 describe('DELETE /users/:id', () => {
     test('should delete a user with specific id', async () => {
         const user = {
@@ -242,14 +243,14 @@ describe('DELETE /users/:id', () => {
         }
 
         User.findByPk = jest.fn().mockResolvedValue(user);
-        user.destory = jest.fn().mockResolvedValue();
+        user.destroy = jest.fn().mockResolvedValue();
 
-        const response = await request(app).delete('/user/1');
+        const response = await request(app).delete('/users/1');
 
         expect(response.statusCode).toBe(200);
         expect(response.text).toBe('User deleted successfuly');
-        expect(User.findByPk).toHaveBeenCalledWith(1);
-        expect(userToDelete.destroy).toHaveBeenCalled();
+        expect(User.findByPk).toHaveBeenCalledWith("1");
+        expect(user.destroy).toHaveBeenCalled();
     });
 
     test('should handle invalid id parameter', async () => {
