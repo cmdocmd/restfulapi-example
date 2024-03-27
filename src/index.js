@@ -42,6 +42,23 @@ app.post('/users', async (req, res) => {
 });
 
 
+// Retrieve details of specific user
+app.get('/users/:id', async (req, res) => {
+    try {
+    const id = req.params.id;
+    if (!Number.isInteger(parseInt(id))) // Invalid ID
+    {
+        res.status(400).send("Invalid ID parameter. It must be an Integer");   
+        return;
+    }
+    const user = await User.findByPk(id);
+    res.send('Retreieved User with id: ' + id + " " + JSON.stringify(user));
+
+    } catch (err) {
+        console.error('Error retreving user with id: ' + id, err); // show console error
+        res.status(500).send("Internal Server Error"); // reply with an error
+    }
+});
 
 app.listen(PORT, ()=> {
     console.log(`Server is running on ${PORT} Port`);
