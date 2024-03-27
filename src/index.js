@@ -108,6 +108,17 @@ app.delete('/users/:id', async (req, res) => {
     }
 });
 
+// Retrieve a list of all posts
+app.get('/posts', async (req, res) => {
+    try {
+        const UsersList = await Post.findAll();
+        res.json(UsersList);
+    } catch (err) { // error handeling
+        console.error('Error retrieving posts: ', err); // show console error
+        res.status(500).send("Internal Server Error"); // reply with an error
+    }
+});
+
 
 app.listen(PORT, ()=> {
     console.log(`Server is running on ${PORT} Port`);
