@@ -47,10 +47,13 @@ app.get('/users/:id', async (req, res) => {
         const id = req.params.id;
         if (!Number.isInteger(parseInt(id))) // Invalid ID
         {
-            res.status(400).send("Invalid ID parameter. It must be an Integer");   
-            return;
+            return res.status(400).send("Invalid ID parameter. It must be an Integer");
         }
-        const user = await User.findByPk(id); // TODO handle NULL
+        const user = await User.findByPk(id);
+        if (!user)
+        {
+            return res.status(404).send('User not found');
+        }
         res.send('Retreieved User with id: ' + id + " " + JSON.stringify(user));
 
     } catch (err) {
@@ -67,11 +70,15 @@ app.put('/users/:id', async (req, res) => {
 
         if (!Number.isInteger(parseInt(id))) // Invalid ID
         {
-            res.status(400).send("Invalid ID parameter. It must be an Integer");   
-            return;
+            return res.status(400).send("Invalid ID parameter. It must be an Integer");
         }
 
-        const user = await User.findByPk(id); // TODO handle NULL
+        const user = await User.findByPk(id); 
+
+        if (!user)
+        {
+            return res.status(404).send('User not found');
+        }
 
         await user.update({
             username: username || user.username, // in case username is not provided keep the default one.
@@ -92,12 +99,14 @@ app.delete('/users/:id', async (req, res) => {
         const id = req.params.id;
 
         if (!Number.isInteger(parseInt(id))) // Invalid ID
-        {
-            res.status(400).send("Invalid ID parameter. It must be an Integer");   
-            return;
+        {  
+            return res.status(400).send("Invalid ID parameter. It must be an Integer");
         }
-        const user = await User.findByPk(id); // TODO handle NULL
-
+        const user = await User.findByPk(id); 
+        if (!user)
+        {
+            return res.status(404).send('User not found');
+        }
         await user.destroy();
 
         res.send("User deleted successfuly");
@@ -141,10 +150,13 @@ app.get('/posts/:id', async (req, res) => {
         const id = req.params.id;
         if (!Number.isInteger(parseInt(id))) // Invalid ID
         {
-            res.status(400).send("Invalid ID parameter. It must be an Integer");   
-            return;
+            return res.status(400).send("Invalid ID parameter. It must be an Integer");
         }
-        const post = await Post.findByPk(id); // TODO handle NULL
+        const post = await Post.findByPk(id);
+        if (!post)
+        {
+            return res.status(404).send('Post not found');
+        }
         res.send('Retreieved Post with id: ' + id + " " + JSON.stringify(post));
 
     } catch (err) {
@@ -161,11 +173,14 @@ app.put('/posts/:id', async (req, res) => {
 
         if (!Number.isInteger(parseInt(id))) // Invalid ID
         {
-            res.status(400).send("Invalid ID parameter. It must be an Integer");   
-            return;
+            return res.status(400).send("Invalid ID parameter. It must be an Integer");
         }
 
-        const post = await Post.findByPk(id); // TODO handle NULL
+        const post = await Post.findByPk(id);
+        if (!post)
+        {
+            return res.status(404).send('Post not found');
+        }
 
         await post.update({
             title: title || post.title, // in case title is not provided keep the default one.
@@ -187,10 +202,13 @@ app.delete('/posts/:id', async (req, res) => {
 
         if (!Number.isInteger(parseInt(id))) // Invalid ID
         {
-            res.status(400).send("Invalid ID parameter. It must be an Integer");   
-            return;
+            return res.status(400).send("Invalid ID parameter. It must be an Integer");
         }
-        const post = await Post.findByPk(id); // TODO handle NULL
+        const post = await Post.findByPk(id); 
+        if (!post)
+        {
+            return res.status(404).send('Post not found');
+        }
 
         await post.destroy();
 
