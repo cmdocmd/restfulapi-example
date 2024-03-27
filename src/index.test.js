@@ -169,7 +169,7 @@ describe('GET /users/:id', () => {
 });
 
 // Update details of a specific user
-describe('PUT /users/update/:id', () => {
+describe('PUT /users/:id', () => {
     test('should update a user by id', async () => {
         const user = {
             id: 1,
@@ -230,4 +230,50 @@ describe('PUT /users/update/:id', () => {
         expect(response.statusCode).toBe(500);
         expect(response.text).toBe('Internal Server Error');
     });    
+});
+
+describe('DELETE /users/:id', () => {
+    test('should delete a user with specific id', async () => {
+        const user = {
+            id: 1,
+            username: 'test',
+            email: 'test@gmail.com',
+            password: 'testpass'
+        }
+
+        User.findByPk = jest.fn().mockResolvedValue(user);
+        user.destory = jest.fn().mockResolvedValue();
+
+        const response = await request(app).delete('/user/1');
+
+        expect(response.statusCode).toBe(200);
+        expect(response.text).toBe('User deleted successfuly');
+        expect(User.findByPk).toHaveBeenCalledWith(1);
+        expect(userToDelete.destroy).toHaveBeenCalled();
+    });
+
+    test('should handle invalid id parameter', async () => {
+        const response = await request(app).delete('/users/abc');
+
+        expect(response.statusCode).toBe(400);
+        expect(response.text).toBe('Invalid ID parameter. It must be an Integer');
+    });
+
+    test('should handle user not found', async () => {
+        User.findByPk = jest.fn().mockResolvedValue(null);
+
+        const response = await request(app).delete('/users/990');
+
+        expect(response.statusCode).toBe(404);
+        expect(response.text).toBe('User not found');
+    });
+
+    test('should handle server errors', async () => {
+        User.findByPk = jest.fn().mockRejectedValue(new Error('Database error'));
+
+        const response = await request(app).delete('/users/1');
+
+        expect(response.statusCode).toBe(500);
+        expect(response.text).toBe('Internal Server Error');
+    });
 });
