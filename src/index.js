@@ -1,6 +1,8 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const cors = require('cors');
+const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
 
 const Post = require('../models/Post');
 const User = require('../models/User');
@@ -25,19 +27,42 @@ app.get('/users', async (req, res) => {
 });
 
 // Creating a new user using POST request
-app.post('/users', async (req, res) => {
+app.post('/auth/signup', async (req, res) => {
     try {
     const {username, email, password} = req.body // POST request uses Body
-
+    const hashedPass = await bcrypt.hash(password, 10); // Hashing password
         const newUser = await User.create({
             username: username,
             email: email,
-            password: password
+            password: hashedPass
         });
         res.send('User created successfully: ' + JSON.stringify(newUser));
     } catch (err) {
         console.error('Error creating a new user: ', err); // show console error
         res.status(500).send("Internal Server Error"); // reply with an error
+    }
+});
+
+// User Login
+app.post('/auth/login', async (req, res) => {
+    try {
+        const { email, password} = req.body;
+        const user = await User.findOne({where: { email }});
+        if (!user)
+        {
+            return res.status(401).json({ error: 'Invalid email or password' });
+        }
+        const isValidPassword = await bcrypt.compare(password, user.password);
+        if (!isValidPassword) {
+            return res.status(401).json({ error: 'Invalid email or password' });
+        }
+
+        const token = jwt.sign({ id: user.id, email: user.email }, 'wfh13102003', { expiresIn: '1h' });
+        res.json({ message: 'Login successful', token });
+    } catch (err)
+    {
+        console.error('Error logging in:', error);
+        res.status(500).json({ error: 'Internal Server Error' });
     }
 });
 
