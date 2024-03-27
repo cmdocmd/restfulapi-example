@@ -41,19 +41,45 @@ app.post('/users', async (req, res) => {
     }
 });
 
-
 // Retrieve details of specific user
 app.get('/users/:id', async (req, res) => {
     try {
-    const id = req.params.id;
-    if (!Number.isInteger(parseInt(id))) // Invalid ID
-    {
-        res.status(400).send("Invalid ID parameter. It must be an Integer");   
-        return;
-    }
-    const user = await User.findByPk(id);
-    res.send('Retreieved User with id: ' + id + " " + JSON.stringify(user));
+        const id = req.params.id;
+        if (!Number.isInteger(parseInt(id))) // Invalid ID
+        {
+            res.status(400).send("Invalid ID parameter. It must be an Integer");   
+            return;
+        }
+        const user = await User.findByPk(id); // TODO handle NULL
+        res.send('Retreieved User with id: ' + id + " " + JSON.stringify(user));
 
+    } catch (err) {
+            console.error('Error retreving user with id: ' + id, err); // show console error
+            res.status(500).send("Internal Server Error"); // reply with an error
+    }
+});
+
+// Update details of specific user
+app.put('/users/:id', async (req, res) => {
+    try {
+        const id = req.params.id;
+        const { username, email, password } = req.body;
+
+        if (!Number.isInteger(parseInt(id))) // Invalid ID
+        {
+            res.status(400).send("Invalid ID parameter. It must be an Integer");   
+            return;
+        }
+
+        const user = await User.findByPk(id); // TODO handle NULL
+
+        await user.update({
+            username: username || user.username, // in case username is not provided keep the default one.
+            email: email || user.email, //
+            password: password || user.password //
+        });
+
+        res.send('User updated successfully');
     } catch (err) {
         console.error('Error retreving user with id: ' + id, err); // show console error
         res.status(500).send("Internal Server Error"); // reply with an error
