@@ -22,9 +22,22 @@ app.get('/users', async (req, res) => {
     }
 });
 
+// Creating a new user using POST request
 app.post('/users', async (req, res) => {
+    try {
+    const {username, email, password} = req.body // POST request uses Body
 
-})
+        const newUser = await User.create({
+            username: username,
+            email: email,
+            password: password
+        });
+        res.send('User created successfully: ' + JSON.stringify(newUser));
+    } catch (err) {
+        console.error('Error creating a new user: ', err); // show console error
+        res.status(500).send("Internal Server Error"); // reply with an error
+    }
+});
 
 app.listen(PORT, ()=> {
     console.log(`Server is running on ${PORT} Port`);
