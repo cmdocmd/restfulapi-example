@@ -289,3 +289,6 @@ app.delete('/posts/:id', AuthenticateToken, async (req, res) => {
 app.listen(PORT, ()=> {
     console.log(`Server is running on ${PORT} Port`);
 });
+
+
+module.exports = app; // exporting app for testing purposes
