@@ -8,6 +8,8 @@ const User = require('../models/User');
 const app = express();
 const PORT = 3500; // PORT Number 
 
+app.use(bodyParser.urlencoded({ extended: true })); // Parse form data
+app.use(express.static('public'));
 app.use(bodyParser.json());
 app.use(cors()); // allow cors to prevent browser from blocking it.
 
@@ -38,6 +40,8 @@ app.post('/users', async (req, res) => {
         res.status(500).send("Internal Server Error"); // reply with an error
     }
 });
+
+
 
 app.listen(PORT, ()=> {
     console.log(`Server is running on ${PORT} Port`);
