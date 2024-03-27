@@ -15,6 +15,20 @@ app.use(express.static('public'));
 app.use(bodyParser.json());
 app.use(cors()); // allow cors to prevent browser from blocking it.
 
+const AuthenticateToken = (req, res, next) => {
+    const token = req.headers['authorization'];
+    if (!token) {
+        return res.status(401).json({ error: 'Unauthorized' });
+    }
+    jwt.verify(token, "wfh13102003", (err, decoded) => {
+        if (err) {
+            return res.status(401).json({ error: 'Unauthorized' });
+        }
+        req.user = decoded;
+        next();
+    });
+}
+
 // Retrieve a list of all users
 app.get('/users', async (req, res) => {
     try {
@@ -153,7 +167,7 @@ app.get('/posts', async (req, res) => {
 });
 
 // Create a new post
-app.post("/posts", async (req, res) => {
+app.post("/posts", AuthenticateToken, async (req, res) => {
     try {
         const {title, content, authorId} = req.body 
     
@@ -191,7 +205,7 @@ app.get('/posts/:id', async (req, res) => {
 });
 
 // Update details of specific post
-app.put('/posts/:id', async (req, res) => {
+app.put('/posts/:id', AuthenticateToken, async (req, res) => {
     try {
         const id = req.params.id;
         const { title, content, authorId } = req.body;
@@ -221,7 +235,7 @@ app.put('/posts/:id', async (req, res) => {
 });
 
 // Delete a specific post
-app.delete('/posts/:id', async (req, res) => {
+app.delete('/posts/:id', AuthenticateToken, async (req, res) => {
     try {
         const id = req.params.id;
 
