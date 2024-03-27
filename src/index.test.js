@@ -77,3 +77,50 @@ describe('POST /auth/signup', () => {
         expect(response.text).toBe('Internal Server Error')
     });
 });
+
+// Login User Test
+describe('POST /auth/login', () => {
+    test('should login a user with valid credentials', async () => {
+        const user = {
+            email: 'test@gmail.com',
+            password: 'testpass'
+        }
+
+        User.findOne = jest.fn().mockResolvedValue({
+            id: 1,
+            email: user.email,
+            password: await bcrypt.hash(user.password, 10)
+        });
+
+        const response = await request(app).post('/auth/login').send(user);
+
+        expect(response.statusCode).toBe(200);
+        expect(response.body).toHaveProperty('message', 'Login successful');
+        expect(response.body).toHaveProperty('token');
+    });
+
+    test('should return an error for invalid credentials', async () => {
+        const user = {
+            email: 'test@gmail.com',
+            password: 'invalidpass'
+        }
+        User.findOne = jest.fn().mockResolvedValue(null);
+        const response = await request(app).post('/auth/login').send(user);
+
+        expect(response.statusCode).toBe(401);
+        expect(response.body).toEqual({ error: 'Invalid email or password' });
+    });
+
+    test('should handle server errors', async () => {
+        const user = {
+            email: 'test@gmail.com',
+            password: 'testpass'
+        }
+
+        User.findOne = jest.fn().mockResolvedValue(new Error('Database Error'));
+        const response = await request(app).post('/auth/login').send(user);
+
+        expect(response.statusCode).toBe(500);
+        expect(response.body).toEqual({error: 'Internal Server Error'});
+    });
+});
