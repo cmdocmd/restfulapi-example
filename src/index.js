@@ -154,7 +154,7 @@ app.get('/posts/:id', async (req, res) => {
     }
 });
 
-// Update details of specific user
+// Update details of specific post
 app.put('/posts/:id', async (req, res) => {
     try {
         const id = req.params.id;
