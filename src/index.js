@@ -124,7 +124,7 @@ app.post("/posts", async (req, res) => {
     try {
         const {title, content, authorId} = req.body 
     
-            const newPost = await User.create({
+            const newPost = await Post.create({
                 title: title,
                 content: content,
                 authorId: authorId
@@ -132,6 +132,24 @@ app.post("/posts", async (req, res) => {
             res.send('Post created successfully: ' + JSON.stringify(newPost));
         } catch (err) {
             console.error('Error creating a new Post: ', err); // show console error
+            res.status(500).send("Internal Server Error"); // reply with an error
+    }
+});
+
+// Retrieve details of specific post
+app.get('/posts/:id', async (req, res) => {
+    try {
+        const id = req.params.id;
+        if (!Number.isInteger(parseInt(id))) // Invalid ID
+        {
+            res.status(400).send("Invalid ID parameter. It must be an Integer");   
+            return;
+        }
+        const post = await Post.findByPk(id); // TODO handle NULL
+        res.send('Retreieved Post with id: ' + id + " " + JSON.stringify(post));
+
+    } catch (err) {
+            console.error('Error retreving post with id: ' + id, err); // show console error
             res.status(500).send("Internal Server Error"); // reply with an error
     }
 });
