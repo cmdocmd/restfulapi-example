@@ -119,6 +119,23 @@ app.get('/posts', async (req, res) => {
     }
 });
 
+// Create a new post
+app.post("/posts", async (req, res) => {
+    try {
+        const {title, content, authorId} = req.body 
+    
+            const newPost = await User.create({
+                title: title,
+                content: content,
+                authorId: authorId
+            });
+            res.send('Post created successfully: ' + JSON.stringify(newPost));
+        } catch (err) {
+            console.error('Error creating a new Post: ', err); // show console error
+            res.status(500).send("Internal Server Error"); // reply with an error
+    }
+});
+
 
 app.listen(PORT, ()=> {
     console.log(`Server is running on ${PORT} Port`);
