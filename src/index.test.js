@@ -384,3 +384,46 @@ describe('POST /posts', () => {
         expect(response.statusCode).toBe(500);
     });
 });
+
+// Retrieve details of specific post test
+describe('GET /posts/:id', () => {
+    test('should retrieve a post with specific id', async () => {
+        const post = {
+            id: 1,
+            title: 'Test Title',
+            content: 'Test Content'
+        }
+
+        Post.findByPk = jest.fn().mockResolvedValueOnce(post);
+
+        const response = await request(app).get('/posts/1');
+        
+        expect(response.statusCode).toBe(200);
+        expect(response.body).toEqual(post);
+    });
+
+    test('should handle invalid id parameter', async () => {
+        const response = await request(app).get('/posts/abc');
+
+        expect(response.statusCode).toBe(400);
+        expect(response.text).toBe('Invalid ID parameter. It must be an Integer');
+    });
+
+    test('should handle post not found', async () => {
+        User.findByPk = jest.fn().mockResolvedValue(null);
+        const response = await request(app).get('/posts/990');
+
+        expect(response.statusCode).toBe(404);
+        expect(response.text).toBe('Post not found');
+    });
+
+    test('should handle internal server errors', async () => {
+        Post.findByPk = jest.fn().mockRejectedValue(new Error('Database error'));
+
+        const response = await request(app).get('/posts/1');
+
+        expect(response.statusCode).toBe(500);
+        expect(response.text).toBe('Internal Server Error');
+    });
+
+});

@@ -221,10 +221,10 @@ app.get('/posts/:id', async (req, res) => {
         {
             return res.status(404).send('Post not found');
         }
-        res.send('Retreieved Post with id: ' + id + " " + JSON.stringify(post));
+        res.json(post);
 
     } catch (err) {
-            console.error('Error retreving post with id: ' + req/params.id, err); // show console error
+            console.error('Error retreving post with id: ' + req.params.id, err); // show console error
             res.status(500).send("Internal Server Error"); // reply with an error
     }
 });
