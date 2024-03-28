@@ -282,9 +282,9 @@ app.delete('/posts/:id', AuthenticateToken, async (req, res) => {
             return res.status(404).send('Post not found');
         }
 
-        await post.destroy();
+        await Post.destroy();
 
-        res.send("Post deleted successfuly");
+        res.send("Post deleted successfully");
     } catch (err) {
         console.error('Error in deleting post with id: ' + req.params.id, err); // show console error
         res.status(500).send("Internal Server Error"); // reply with an error

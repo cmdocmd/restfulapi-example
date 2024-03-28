@@ -428,9 +428,9 @@ describe('GET /posts/:id', () => {
 
 });
 
-// Update details of specific post
+// Update details of specific post Test
 describe('PUT /posts/:id', () => {
-    const token = jwt.sign({ userId: 123 }, 'wfh13102003');
+    const token = jwt.sign({ id: 1, email: 'test@gmail.com' }, 'wfh13102003', { expiresIn: '1h' })
     test('should update details of specific post', async () => {
         
         const post = {
@@ -469,5 +469,45 @@ describe('PUT /posts/:id', () => {
         const response = await request(app).put('/posts/1').set('Authorization', token).send({});
 
         expect(response.statusCode).toBe(500);
+    });
+});
+
+// Delete details of specific post Test
+describe('DELETE /posts/:id', () => {
+    const token = jwt.sign({ id: 1, email: 'test@gmail.com' }, 'wfh13102003', { expiresIn: '1h' })
+    test('should delete a specific post', async () => {
+        const post = {
+            id: 1,
+            title: 'Updated Title',
+            content: 'Updated Content',
+            authorId: 2
+        }
+
+        Post.findByPk = jest.fn().mockResolvedValueOnce(post);
+        Post.destroy = jest.fn().mockResolvedValue();
+
+        const response = await request(app).delete('/posts/1').set('Authorization', token).send({});
+
+        expect(response.statusCode).toBe(200);
+        expect(response.text).toBe('Post deleted successfully');
+        expect(Post.findByPk).toHaveBeenCalledWith("1");
+        expect(Post.destroy).toHaveBeenCalled();
+    });
+
+    test('should handle invalid id', async () => {
+        const response = await request(app).delete('/posts/abc').set('Authorization', token).send({});
+
+        expect(response.statusCode).toBe(400);
+    });
+
+    test('should handle internal server errors', async () => {
+        Post.findByPk = jest.fn().mockImplementationOnce(() => {
+            throw new Error('Database Error');
+        });
+
+        const response = await request(app).delete('/posts/1').set('Authorization', token);
+
+        expect(response.statusCode).toBe(500);
+        expect(response.text).toBe('Internal Server Error');
     });
 });
