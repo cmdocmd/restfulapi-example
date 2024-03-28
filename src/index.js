@@ -235,11 +235,6 @@ app.put('/posts/:id', AuthenticateToken, async (req, res) => {
         const id = req.params.id;
         const { title, content, authorId } = req.body;
 
-        if (!title || !content || !authorId || title.length > 255)
-        {
-            res.status(400).json({ error: "Invalid input. title is exceeds maximum length." });
-        }
-
         if (!Number.isInteger(parseInt(id))) // Invalid ID
         {
             return res.status(400).send("Invalid ID parameter. It must be an Integer");
@@ -249,6 +244,11 @@ app.put('/posts/:id', AuthenticateToken, async (req, res) => {
         if (!post)
         {
             return res.status(404).send('Post not found');
+        }
+
+        if (!title || !content || !authorId || title.length > 255)
+        {
+            return res.status(400).json({ error: "Invalid input. title is exceeds maximum length." });
         }
 
         await Post.update({

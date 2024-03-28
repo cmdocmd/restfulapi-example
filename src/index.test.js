@@ -427,3 +427,47 @@ describe('GET /posts/:id', () => {
     });
 
 });
+
+// Update details of specific post
+describe('PUT /posts/:id', () => {
+    const token = jwt.sign({ userId: 123 }, 'wfh13102003');
+    test('should update details of specific post', async () => {
+        
+        const post = {
+            title: 'Updated Title',
+            content: 'Updated Content',
+            authorId: 2
+        }
+
+        Post.findByPk = jest.fn().mockResolvedValueOnce({id:1, title: 'Test Title', content: 'Test Content', authorId: 2});
+        Post.update = jest.fn().mockResolvedValueOnce([1]);
+
+        const response = await request(app).put('/posts/2').set('Authorization', token).send(post);
+
+        expect(response.statusCode).toBe(200);
+        expect(response.text).toContain('Post updated successfully');
+    });
+
+    test('should handle invalid id', async () => {
+        const response = await request(app).put('/posts/invalid').set('Authorization', token).send({});
+
+        expect(response.statusCode).toBe(400);
+    });
+
+    test('should handle post not found', async () => {
+        Post.findByPk = jest.fn().mockResolvedValue(null);
+        const response = await request(app).put('/posts/999').set('Authorization', token).send({});
+
+        expect(response.statusCode).toBe(404);
+    });
+
+    test('should handle internal server error', async () => {
+        Post.findByPk = jest.fn().mockImplementationOnce(() => {
+            throw new Error('Database Error');
+        });
+
+        const response = await request(app).put('/posts/1').set('Authorization', token).send({});
+
+        expect(response.statusCode).toBe(500);
+    });
+});
