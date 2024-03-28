@@ -305,6 +305,8 @@ describe('GET /posts', () => {
 
 // Create a new post Test
 describe('POST /posts', () => {
+    const token = jwt.sign({ userId: 123 }, 'wfh13102003');
+
     test('should create a new post', async () => {
         const postData = {
             title: 'Test Post',
@@ -319,8 +321,6 @@ describe('POST /posts', () => {
             authorId: postData.authorId
         });
 
-        const token = jwt.sign({ userId: 123 }, 'wfh13102003');
-
         const response = await request(app)
             .post('/posts')
             .set('Authorization', token)
@@ -330,13 +330,20 @@ describe('POST /posts', () => {
         expect(response.text).toContain('Post created successfully');
     });
 
+    test('should handle unauthorized access', async () => {
+        const response = await request(app)
+        .post('/posts')
+        .send({ title: 'Test Title', content: 'Test Content', authorId: 1 });
+
+        expect(response.statusCode).toBe(401);
+    });
+
     test('should handle invalid authorid', async () => {
         const invalidPostData = {
             title: 'Test Post',
             content: 'Test Content',
             authorId: 'invalid'
         };
-        const token = jwt.sign({ userId: 123 }, 'wfh13102003');
 
         const response = await request(app)
             .post('/posts')
@@ -352,8 +359,6 @@ describe('POST /posts', () => {
             content: 'a'.repeat(256),
             authorId: 123
         };
-
-        const token = jwt.sign({ userId: 123 }, 'wfh13102003');
 
         const response = await request(app)
             .post('/posts')
@@ -373,8 +378,6 @@ describe('POST /posts', () => {
         Post.create = jest.fn().mockImplementationOnce(() => {
             throw new Error('Sample Error');
         });
-
-        const token = jwt.sign({ userId: 123 }, 'wfh13102003');
 
         const response = await request(app)
             .post('/posts')
@@ -454,6 +457,12 @@ describe('PUT /posts/:id', () => {
         expect(response.statusCode).toBe(400);
     });
 
+    test('should handle unauthorized access', async () => {
+        const response = await request(app).put('/posts/1').send({});
+
+        expect(response.statusCode).toBe(401);
+    });
+
     test('should handle post not found', async () => {
         Post.findByPk = jest.fn().mockResolvedValue(null);
         const response = await request(app).put('/posts/999').set('Authorization', token).send({});
@@ -500,6 +509,12 @@ describe('DELETE /posts/:id', () => {
         expect(response.statusCode).toBe(400);
     });
 
+    test('should handle unauthorized access', async () => {
+        const response = await request(app).delete('/posts/1').send({});
+
+        expect(response.statusCode).toBe(401);
+    });
+
     test('should handle internal server errors', async () => {
         Post.findByPk = jest.fn().mockImplementationOnce(() => {
             throw new Error('Database Error');
@@ -510,4 +525,5 @@ describe('DELETE /posts/:id', () => {
         expect(response.statusCode).toBe(500);
         expect(response.text).toBe('Internal Server Error');
     });
+    
 });
