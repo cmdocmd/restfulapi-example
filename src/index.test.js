@@ -1,5 +1,6 @@
 const request = require('supertest');
-const { app, bcrypt } = require('./index');
+const { app, bcrypt, jwt } = require('./index');
+
 const Post = require('../models/Post');
 const User = require('../models/User');
 
@@ -299,5 +300,87 @@ describe('GET /posts', () => {
         const response = await request(app).get('/posts');
         expect(response.statusCode).toBe(500);
         expect(response.text).toBe('Internal Server Error');
+    });
+});
+
+// Create a new post Test
+describe('POST /posts', () => {
+    test('should create a new post', async () => {
+        const postData = {
+            title: 'Test Post',
+            content: 'Test Content',
+            authorId: 123
+        };
+
+        Post.create = jest.fn()
+        .mockResolvedValueOnce({ 
+            title: postData.title,
+            content: postData.content,
+            authorId: postData.authorId
+        });
+
+        const token = jwt.sign({ userId: 123 }, 'wfh13102003');
+
+        const response = await request(app)
+            .post('/posts')
+            .set('Authorization', token)
+            .send(postData);
+
+        expect(response.statusCode).toBe(200);
+        expect(response.text).toContain('Post created successfully');
+    });
+
+    test('should handle invalid authorid', async () => {
+        const invalidPostData = {
+            title: 'Test Post',
+            content: 'Test Content',
+            authorId: 'invalid'
+        };
+        const token = jwt.sign({ userId: 123 }, 'wfh13102003');
+
+        const response = await request(app)
+            .post('/posts')
+            .set('Authorization', token)
+            .send(invalidPostData);
+
+        expect(response.statusCode).toBe(400);
+    });
+
+    test('should return 400 if title or content is empty or exceeds maximum length', async () => {
+        const invalidPostData = {
+            title: '',
+            content: 'a'.repeat(256),
+            authorId: 123
+        };
+
+        const token = jwt.sign({ userId: 123 }, 'wfh13102003');
+
+        const response = await request(app)
+            .post('/posts')
+            .set('Authorization', token)
+            .send(invalidPostData);
+
+        expect(response.statusCode).toBe(400);
+    });
+
+    test('should handle internal server error', async () => {
+        const postData = {
+            title: 'Test Post',
+            content: 'Test Content',
+            authorId: 123
+        };
+
+        Post.create = jest.fn().mockImplementationOnce(() => {
+            throw new Error('Sample Error');
+        });
+
+        const token = jwt.sign({ userId: 123 }, 'wfh13102003');
+
+        const response = await request(app)
+            .post('/posts')
+            .set('Authorization', token)
+            .send(postData);
+
+        expect(response.statusCode).toBe(500);
     });
 });

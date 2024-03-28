@@ -299,5 +299,6 @@ app.listen(PORT, ()=> {
 
 module.exports = {
     app,
-    bcrypt
+    bcrypt,
+    jwt
   };
